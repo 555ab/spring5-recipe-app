@@ -17,8 +17,13 @@ public class Recipe {
     private String source;
     private String url;
     private String directions;
-    // todo add
-    //private Difficulty difficulty;
+
+    // default type ist ORDINAL, d. h. Werte werden als 1, 2, ... persistiert.
+    // Um das unproblematische spaetere Einfuegen neuer Felder in der Enum zu
+    // ermoeglichen, ist es besser, die Werte als Strings zu apeichern, damit
+    // es zu keinen Konflikten wegen der Anordnung kommen kann.
+    @Enumerated(value = EnumType.STRING)
+    private Difficulty difficulty;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy ="recipe")
     private Set<Ingredient> ingredients;
@@ -26,9 +31,15 @@ public class Recipe {
     @Lob // will be created as a BLOB (binary large object) in database
     private Byte[] image;
 
-    // if a recipe is deleted, delete all its notes
+    // if a recipe is deleted, delete its notes
     @OneToOne(cascade = CascadeType.ALL)
     private Notes notes;
+
+    @ManyToMany
+    @JoinTable(name = "recipe_category",
+        joinColumns = @JoinColumn(name = "recipe_id"),
+        inverseJoinColumns = @JoinColumn(name = "category_id"))
+    private Set<Category> categories;
 
     public Long getId() {
         return id;
@@ -92,6 +103,14 @@ public class Recipe {
 
     public void setDirections(String directions) {
         this.directions = directions;
+    }
+
+    public Difficulty getDifficulty() {
+        return difficulty;
+    }
+
+    public void setDifficulty(Difficulty difficulty) {
+        this.difficulty = difficulty;
     }
 
     public Set<Ingredient> getIngredients() {
